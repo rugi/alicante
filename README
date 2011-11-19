@@ -1,4 +1,6 @@
 Libreria base para realizar busquedas de archivos.
+Contiene clases que ayudan a realizar el crawling local y remoto de archivos.
+Creado originalmente para Jarhalla.com
 Lenguaje: java
 Versión: 1.6
 
