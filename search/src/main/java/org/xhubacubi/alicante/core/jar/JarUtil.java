@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -24,6 +25,8 @@ public final class JarUtil {
     private StringBuilder sourceFile;
     private Manifest manifest;
     private JarFile jarFile;
+    private long lastModif;
+    private int size;
 
     public JarUtil(String source) {
         super();
@@ -69,8 +72,10 @@ public final class JarUtil {
             URL url = new URL("jar:" + this.sourceFile.toString() + "!/");
             jarConnection = (JarURLConnection) url.openConnection();
             //asignamos el manifest y el jarFile unicamente.
-            manifest = jarConnection.getManifest();
+            manifest = jarConnection.getManifest();            
             jarFile = jarConnection.getJarFile();
+            this.lastModif = jarConnection.getLastModified();
+            this.size=jarConnection.getContentLength();                     
             //la conexion ya no es necesari
             jarConnection = null;
         } catch (IOException ex) {
@@ -85,8 +90,7 @@ public final class JarUtil {
      */
     public List<String> getClassInside() {
 
-        List<String> s = new ArrayList<String>();
-
+        List<String> s = new ArrayList<String>();        
         Enumeration<JarEntry> enum1 = jarFile.entries();
         while (enum1.hasMoreElements()) {
             JarEntry temp = enum1.nextElement();
@@ -96,6 +100,20 @@ public final class JarUtil {
         }
 
         return s;
+    }
+
+    /**
+     * @return the lastModif
+     */
+    public long getLastModif() {
+        return lastModif;
+    }
+
+    /**
+     * @return the size
+     */
+    public int getSize() {
+        return size;
     }
 
     static class Decorator {
