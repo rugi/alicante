@@ -25,7 +25,7 @@ public class SearchFilesUtil implements ISearchable {
         if (new File(folder).isDirectory()) {
             searchInFolder(new File(folder), pattern, res);
         } else {
-            throw new IOException("El origen proporcionado no es v‡lido.");
+            throw new IOException("El origen proporcionado no es valido.");
         }
         return res;
     }

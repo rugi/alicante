@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -73,7 +72,7 @@ public final class JarUtil {
             jarConnection = (JarURLConnection) url.openConnection();
             //asignamos el manifest y el jarFile unicamente.
             manifest = jarConnection.getManifest();            
-            jarFile = jarConnection.getJarFile();
+            jarFile = jarConnection.getJarFile();                
             this.lastModif = jarConnection.getLastModified();
             this.size=jarConnection.getContentLength();                     
             //la conexion ya no es necesari
