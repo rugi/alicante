@@ -26,10 +26,16 @@ public final class JarUtil {
     private JarFile jarFile;
     private long lastModif;
     private int size;
+    private boolean valid;
+    private StringBuilder lastError;
 
+    public JarUtil(){
+        this("");
+    }
     public JarUtil(String source) {
         super();
         sourceFile = new StringBuilder();
+        lastError = new StringBuilder();
         setSourceFile(source);
     }
 
@@ -50,7 +56,7 @@ public final class JarUtil {
     }
 
     public Manifest getManifest() throws IOException {
-        return this.manifest;
+        return this.manifest==null?new Manifest():this.manifest;
     }
 
     /**
@@ -64,21 +70,28 @@ public final class JarUtil {
      * @param sourceFile the sourceFile to set
      */
     public void setSourceFile(String sourceFile) {
+        //TODO REvisar bien la optimizacion de este metodo.
+        this.valid=  false;
         JarURLConnection jarConnection;
         this.sourceFile.delete(0, this.sourceFile.length());
         this.sourceFile.append(target(sourceFile));
+        this.lastError.delete(0, this.getLastError().length());
         try {
             URL url = new URL("jar:" + this.sourceFile.toString() + "!/");
             jarConnection = (JarURLConnection) url.openConnection();
             //asignamos el manifest y el jarFile unicamente.
+            manifest = null;
             manifest = jarConnection.getManifest();            
+            jarFile = null;
             jarFile = jarConnection.getJarFile();                
             this.lastModif = jarConnection.getLastModified();
             this.size=jarConnection.getContentLength();                     
-            //la conexion ya no es necesari
+            //la conexion ya no es necesaria
+            this.valid= true;            
             jarConnection = null;
-        } catch (IOException ex) {
-            throw new RuntimeException("Origen desconocido.No se puede procesar. " + ex);
+        } catch (IOException ex) {            
+            this.valid= false;
+            this.lastError.append(ex.toString());
         }
     }
 
@@ -113,6 +126,20 @@ public final class JarUtil {
      */
     public int getSize() {
         return size;
+    }
+
+    /**
+     * @return the valid
+     */
+    public boolean isValid() {
+        return valid;
+    }
+
+    /**
+     * @return the lastError
+     */
+    public String getLastError() {
+        return lastError.toString();
     }
 
     static class Decorator {
