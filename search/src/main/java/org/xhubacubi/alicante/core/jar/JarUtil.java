@@ -11,8 +11,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
@@ -23,24 +21,28 @@ public final class JarUtil {
 
     private StringBuilder sourceFile;
     private Manifest manifest;
-    private JarFile jarFile;
     private long lastModif;
     private int size;
     private boolean valid;
     private StringBuilder lastError;
+    private List<String> content;
 
-    public JarUtil(){
+    public JarUtil() {
         this("");
     }
+
     public JarUtil(String source) {
         super();
         sourceFile = new StringBuilder();
         lastError = new StringBuilder();
+        this.valid = false;
+        content = new ArrayList<String>();
         setSourceFile(source);
     }
 
     /**
      * Establece el target desde el cual se recupera el contenido del jar.
+     *
      * @param s
      * @return
      */
@@ -56,7 +58,7 @@ public final class JarUtil {
     }
 
     public Manifest getManifest() throws IOException {
-        return this.manifest==null?new Manifest():this.manifest;
+        return this.manifest == null ? new Manifest() : this.manifest;
     }
 
     /**
@@ -71,7 +73,7 @@ public final class JarUtil {
      */
     public void setSourceFile(String sourceFile) {
         //TODO REvisar bien la optimizacion de este metodo.
-        this.valid=  false;
+        this.valid = false;
         JarURLConnection jarConnection;
         this.sourceFile.delete(0, this.sourceFile.length());
         this.sourceFile.append(target(sourceFile));
@@ -81,37 +83,46 @@ public final class JarUtil {
             jarConnection = (JarURLConnection) url.openConnection();
             //asignamos el manifest y el jarFile unicamente.
             manifest = null;
-            manifest = jarConnection.getManifest();            
-            jarFile = null;
-            jarFile = jarConnection.getJarFile();                
+            manifest = jarConnection.getManifest();
+            this.content.clear();
+            this.content.addAll(toList(jarConnection.getJarFile().entries()));
             this.lastModif = jarConnection.getLastModified();
-            this.size=jarConnection.getContentLength();                     
+            this.size = jarConnection.getContentLength();
             //la conexion ya no es necesaria
-            this.valid= true;            
+            this.valid = true;            
             jarConnection = null;
-        } catch (IOException ex) {            
-            this.valid= false;
+        } catch (IOException ex) {
+            this.valid = false;
             this.lastError.append(ex.toString());
         }
+        
+    }
+
+    public void clear() {        
+        this.valid = false;
+        this.manifest = null;
+        this.content.clear();
+        this.sourceFile.delete(0, this.sourceFile.length());
+        this.lastError.delete(0, this.getLastError().length());
+        this.lastModif = -1;
+        this.size = -1;
+    }
+
+    private List<String> toList(Enumeration e) {
+        List<String> l = new ArrayList<String>();
+        while (e.hasMoreElements()) {
+            l.add(e.nextElement().toString());
+        }
+        return l;
     }
 
     /**
-     * Devuelve un listado de los JarEntrys que contienen    
-     * clases.
+     * Devuelve un listado de los JarEntrys que contienen clases.
+     *
      * @return
      */
     public List<String> getClassInside() {
-
-        List<String> s = new ArrayList<String>();        
-        Enumeration<JarEntry> enum1 = jarFile.entries();
-        while (enum1.hasMoreElements()) {
-            JarEntry temp = enum1.nextElement();
-            if (temp.getName().endsWith(".class")) {
-                s.add(temp.getName());
-            }
-        }
-
-        return s;
+        return this.content;
     }
 
     /**
@@ -151,9 +162,15 @@ public final class JarUtil {
     }
 
     @Override
-    public void finalize() {
-        this.jarFile = null;
-        this.sourceFile = null;
-        this.jarFile =null;
+    public void finalize() throws Throwable {
+        super.finalize();
+        sourceFile.delete(0, sourceFile.length());
+        sourceFile = null;
+        manifest = null;
+        lastError.delete(0, lastError.length());
+        lastError = null;
+        content.clear();
+        content = null;        
+        System.out.println("<<<finalize>>>");
     }
 }
