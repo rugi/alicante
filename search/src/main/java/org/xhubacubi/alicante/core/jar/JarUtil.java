@@ -8,9 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
+import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 /**
@@ -38,6 +37,36 @@ public final class JarUtil {
         this.valid = false;
         content = new ArrayList<String>();
         setSourceFile(source);
+    }
+
+    public Map<String, String> getManifestContentInMap() {
+        Map resm = new HashMap<String, String>();
+
+        if (this.manifest != null) {
+            StringBuilder row0 = new StringBuilder();
+            Map map = this.manifest.getEntries();
+            Iterator it = map.keySet().iterator();
+            StringBuilder res = new StringBuilder();
+            StringBuilder res2 = new StringBuilder();
+            while (it.hasNext()) {
+                res.delete(0, res.length());
+                res.append(it.next());
+                Attributes at = (Attributes) map.get(res.toString());
+                Iterator llavesAt = at.keySet().iterator();
+                while (llavesAt.hasNext()) {
+                    res2.delete(0, res2.length());
+                    res2.append(llavesAt.next());
+                    row0.delete(0, row0.length());
+                    row0.append("[").append(res.toString().toUpperCase()).
+                            append("]: ").append(res2.toString());
+                    System.out.println("llave: "+ row0.toString());
+                    System.out.println("    valor:"+at.getValue(res2.toString()));
+                    resm.put(row0.toString(), at.getValue(res2.toString()));
+                }//while next
+
+            }//while              
+        }
+        return resm;
     }
 
     /**
@@ -89,16 +118,16 @@ public final class JarUtil {
             this.lastModif = jarConnection.getLastModified();
             this.size = jarConnection.getContentLength();
             //la conexion ya no es necesaria
-            this.valid = true;            
+            this.valid = true;
             jarConnection = null;
         } catch (IOException ex) {
             this.valid = false;
             this.lastError.append(ex.toString());
         }
-        
+
     }
 
-    public void clear() {        
+    public void clear() {
         this.valid = false;
         this.manifest = null;
         this.content.clear();
@@ -170,7 +199,7 @@ public final class JarUtil {
         lastError.delete(0, lastError.length());
         lastError = null;
         content.clear();
-        content = null;        
+        content = null;
         System.out.println("<<<finalize>>>");
     }
 }
