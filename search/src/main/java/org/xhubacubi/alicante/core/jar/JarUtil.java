@@ -59,8 +59,6 @@ public final class JarUtil {
                     row0.delete(0, row0.length());
                     row0.append("[").append(res.toString().toUpperCase()).
                             append("]: ").append(res2.toString());
-                    System.out.println("llave: "+ row0.toString());
-                    System.out.println("    valor:"+at.getValue(res2.toString()));
                     resm.put(row0.toString(), at.getValue(res2.toString()));
                 }//while next
 
