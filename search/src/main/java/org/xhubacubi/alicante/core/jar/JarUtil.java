@@ -197,7 +197,6 @@ public final class JarUtil {
         lastError.delete(0, lastError.length());
         lastError = null;
         content.clear();
-        content = null;
-        System.out.println("<<<finalize>>>");
+        content = null;        
     }
 }
